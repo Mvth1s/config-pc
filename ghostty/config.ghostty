@@ -1,0 +1,48 @@
+# ~/.config/ghostty/config
+
+# ── Apparence ────────────────────────────────────────────────
+theme = Everforest Dark Hard
+
+font-family = "JetBrains Mono"
+font-size = 13
+font-feature = calt, liga
+
+background-opacity = 0.93
+background-blur = 8
+
+window-padding-x = 14
+window-padding-y = 14
+window-padding-balance = true
+window-padding-color = background
+
+# ── Curseur ──────────────────────────────────────────────────
+cursor-style = bar
+cursor-style-blink = true
+
+# ── Performance ──────────────────────────────────────────────
+gtk-single-instance = desktop
+scrollback-limit = 10000000
+
+# ── Intégration shell ────────────────────────────────────────
+shell-integration = detect
+shell-integration-features = cursor,sudo,title
+
+# ── Qualité de vie ───────────────────────────────────────────
+mouse-hide-while-typing = true
+clipboard-trim-trailing-spaces = true
+
+# ── Keybindings ──────────────────────────────────────────────
+keybind = ctrl+shift+h=new_split:left
+keybind = ctrl+shift+l=new_split:right
+keybind = ctrl+shift+j=new_split:down
+keybind = ctrl+shift+k=new_split:up
+keybind = ctrl+shift+t=new_tab
+keybind = ctrl+tab=next_tab
+keybind = ctrl+shift+tab=previous_tab
+
+# ── À adapter selon la machine ───────────────────────────────
+# Sur KDE (desktop EndeavourOS) → décorations natives KDE :
+#   gtk-titlebar = false
+#
+# Sur COSMIC (laptop Pop!_OS) → laisser commenté ou mettre :
+gtk-titlebar = false
