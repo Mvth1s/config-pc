@@ -32,6 +32,95 @@ if [[ "$DISTRO_FAMILY" == "debian" ]] && cmd_exists batcat && ! cmd_exists bat; 
     log_success "Symlink /usr/local/bin/bat créé"
 fi
 
+# ── Fastfetch ──────────────────────────────────────────────
+install_fastfetch() {
+    if cmd_exists fastfetch; then
+        log_info "fastfetch déjà présent"
+        return
+    fi
+
+    log_step "Installation de Fastfetch"
+
+    local arch
+    case "$(uname -m)" in
+        x86_64)  arch="amd64" ;;
+        aarch64) arch="aarch64" ;;
+        *)       arch="amd64" ;;
+    esac
+
+    case "$DISTRO_FAMILY" in
+        arch)
+            eval "$PKG_INSTALL fastfetch"
+            ;;
+        debian)
+            local url
+            url=$(curl -s https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest \
+                | grep "browser_download_url.*linux_${arch}\.deb" | cut -d'"' -f4)
+            curl -Lo /tmp/fastfetch.deb "$url"
+            sudo dpkg -i /tmp/fastfetch.deb
+            rm /tmp/fastfetch.deb
+            ;;
+        rhel)
+            local url
+            url=$(curl -s https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest \
+                | grep "browser_download_url.*linux_${arch}\.rpm" | cut -d'"' -f4)
+            curl -Lo /tmp/fastfetch.rpm "$url"
+            sudo rpm -i /tmp/fastfetch.rpm
+            rm /tmp/fastfetch.rpm
+            ;;
+        suse)
+            eval "$PKG_INSTALL fastfetch" 2>/dev/null || {
+                local url
+                url=$(curl -s https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest \
+                    | grep "browser_download_url.*linux_${arch}\.rpm" | cut -d'"' -f4)
+                curl -Lo /tmp/fastfetch.rpm "$url"
+                sudo rpm -i /tmp/fastfetch.rpm
+                rm /tmp/fastfetch.rpm
+            }
+            ;;
+    esac
+
+    cmd_exists fastfetch \
+        && log_success "fastfetch installé" \
+        || log_warn "fastfetch : échec, installation manuelle requise"
+}
+
+# ── Ghostty ────────────────────────────────────────────────
+install_ghostty() {
+    if cmd_exists ghostty; then
+        log_info "ghostty déjà présent"
+        return
+    fi
+
+    log_step "Installation de Ghostty"
+
+    case "$DISTRO_FAMILY" in
+        arch)
+            eval "$PKG_INSTALL ghostty"
+            ;;
+        debian)
+            sudo apt install -y software-properties-common
+            sudo add-apt-repository -y ppa:glasen/ghostty
+            sudo apt update && sudo apt install -y ghostty
+            ;;
+        rhel)
+            eval "$PKG_INSTALL ghostty" 2>/dev/null \
+                || log_warn "ghostty non disponible — voir https://ghostty.org/docs/install"
+            ;;
+        suse)
+            eval "$PKG_INSTALL ghostty" 2>/dev/null \
+                || log_warn "ghostty non disponible — voir https://ghostty.org/docs/install"
+            ;;
+    esac
+
+    cmd_exists ghostty \
+        && log_success "ghostty installé" \
+        || log_warn "ghostty : échec, voir https://ghostty.org/docs/install"
+}
+
+install_fastfetch
+install_ghostty
+
 log_step "Installation de Brave Browser"
 if ! cmd_exists brave-browser; then
     log_info "Installation de Brave via le script officiel..."
