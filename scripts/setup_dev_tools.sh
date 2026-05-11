@@ -31,6 +31,15 @@ else
     log_info "Node.js LTS déjà installé"
 fi
 
+log_step "Installation de pnpm"
+if ! cmd_exists pnpm; then
+    log_info "Installation de pnpm..."
+    npm install -g pnpm
+    log_success "pnpm installé : $(pnpm --version)"
+else
+    log_info "pnpm déjà présent"
+fi
+
 log_step "Installation de Docker"
 
 if ! cmd_exists docker; then

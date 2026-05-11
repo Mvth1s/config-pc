@@ -41,6 +41,17 @@ else
     log_info "oh-my-posh déjà présent"
 fi
 
+log_step "Installation de zinit"
+ZINIT_HOME="$HOME/.local/share/zinit/zinit.git"
+if [[ ! -d "$ZINIT_HOME" ]]; then
+    log_info "Installation de zinit..."
+    mkdir -p "$(dirname "$ZINIT_HOME")"
+    git clone https://github.com/zdharma-continuum/zinit "$ZINIT_HOME"
+    log_success "zinit installé"
+else
+    log_info "zinit déjà présent"
+fi
+
 log_step "Shell par défaut"
 if [[ "$SHELL" != "$(which zsh 2>/dev/null || true)" ]]; then
     if confirm "Définir zsh comme shell par défaut ?"; then
