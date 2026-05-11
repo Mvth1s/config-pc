@@ -32,35 +32,13 @@ link_config "zed"          "$HOME/.config/zed"
 link_config "zsh/.zshrc"   "$HOME/.zshrc"
 link_config "zsh/.aliases" "$HOME/.aliases"
 
-log_step "Installation des plugins zsh"
-ZSH_PLUGIN_DIR="$HOME/.zsh"
-mkdir -p "$ZSH_PLUGIN_DIR"
-
-if [[ ! -d "$ZSH_PLUGIN_DIR/zsh-autosuggestions" ]]; then
-    log_info "Clonage zsh-autosuggestions..."
-    git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions \
-        "$ZSH_PLUGIN_DIR/zsh-autosuggestions"
-    log_success "zsh-autosuggestions installé"
+log_step "Installation de oh-my-posh"
+if ! cmd_exists oh-my-posh; then
+    log_info "Installation de oh-my-posh..."
+    curl -s https://ohmyposh.dev/install.sh | bash -s
+    log_success "oh-my-posh installé"
 else
-    log_info "zsh-autosuggestions déjà présent"
-fi
-
-if [[ ! -d "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting" ]]; then
-    log_info "Clonage zsh-syntax-highlighting..."
-    git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting \
-        "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting"
-    log_success "zsh-syntax-highlighting installé"
-else
-    log_info "zsh-syntax-highlighting déjà présent"
-fi
-
-log_step "Installation de Starship"
-if ! cmd_exists starship; then
-    log_info "Installation de Starship..."
-    curl -sS https://starship.rs/install.sh | sh -s -- --yes
-    log_success "Starship installé"
-else
-    log_info "Starship déjà présent"
+    log_info "oh-my-posh déjà présent"
 fi
 
 log_step "Shell par défaut"
