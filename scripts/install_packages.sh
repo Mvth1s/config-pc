@@ -18,7 +18,7 @@ PACKAGES=(
 )
 
 if [[ "$DISTRO_FAMILY" == "debian" ]]; then
-    PACKAGES=("${PACKAGES[@]/bat/batcat}")
+    PACKAGES=("${PACKAGES[@]/openssh/openssh-client}")
 fi
 
 IFS=' ' read -ra _install_cmd <<< "$PKG_INSTALL"
