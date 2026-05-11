@@ -93,6 +93,8 @@ alias dcd="docker compose down"     # arrête et supprime les conteneurs
 alias dps="docker ps"               # liste les conteneurs actifs
 alias dlogs="docker logs -f"        # suit les logs d'un conteneur en temps réel
 
+alias ssh='TERM=xterm-256color ssh'
+
 ############################
 # OH MY POSH
 ############################
