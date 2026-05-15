@@ -22,13 +22,13 @@ export NVM_DIR="$HOME/.nvm"
 # shellcheck source=/dev/null
 [[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
 
-if ! nvm ls --no-colors lts/* &>/dev/null 2>&1; then
+if ! nvm ls lts/* 2>/dev/null | grep -q "lts/"; then
     log_info "Installation de Node.js LTS..."
     nvm install --lts
     nvm use --lts
     log_success "Node.js LTS installé : $(node --version)"
 else
-    log_info "Node.js LTS déjà installé"
+    log_info "Node.js LTS déjà installé : $(node --version)"
 fi
 
 log_step "Installation de pnpm"

@@ -41,6 +41,9 @@ else
     log_info "oh-my-posh déjà présent"
 fi
 
+export PATH="$HOME/.local/bin:$PATH"
+log_success "~/.local/bin ajouté au PATH (session courante)"
+
 log_step "Installation des Nerd Fonts (JetBrainsMono)"
 if ! fc-list | grep -qi "JetBrainsMono Nerd"; then
     log_info "Installation de JetBrainsMono Nerd Font via oh-my-posh..."

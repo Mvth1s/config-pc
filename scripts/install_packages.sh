@@ -6,20 +6,28 @@ source "$SCRIPT_DIR/utils.sh"
 [[ -z "${DISTRO_FAMILY:-}" ]] && source "$SCRIPT_DIR/detect_distro.sh"
 
 log_step "Mise à jour du système"
-eval "$PKG_UPDATE"
+if [[ "$PKG_MANAGER" == "apt" ]]; then
+    sudo apt update 2>&1 | grep -v "^W:" | grep -v "^N:" || true
+    sudo apt upgrade -y
+else
+    eval "$PKG_UPDATE"
+fi
 log_success "Système à jour"
 
 log_step "Installation des paquets communs"
 PACKAGES=(
     zsh curl wget git htop btop tree unzip zip
-    ripgrep fzf eza bat tmux neofetch openssh
+    ripgrep fzf eza bat tmux neofetch
     xclip wl-clipboard jq neovim ranger rsync
     net-tools nmap pipx imagemagick
 )
 
-if [[ "$DISTRO_FAMILY" == "debian" ]]; then
-    PACKAGES=("${PACKAGES[@]/openssh/openssh-client}")
-fi
+case "$DISTRO_FAMILY" in
+    debian) PACKAGES+=(openssh-client) ;;
+    arch)   PACKAGES+=(openssh) ;;
+    rhel)   PACKAGES+=(openssh-clients) ;;
+    suse)   PACKAGES+=(openssh-clients) ;;
+esac
 
 IFS=' ' read -ra _install_cmd <<< "$PKG_INSTALL"
 "${_install_cmd[@]}" "${PACKAGES[@]}"
@@ -52,31 +60,20 @@ install_fastfetch() {
         arch)
             eval "$PKG_INSTALL fastfetch"
             ;;
-        debian)
-            local url
-            url=$(curl -s https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest \
-                | grep "browser_download_url.*linux_${arch}\.deb" | cut -d'"' -f4)
-            curl -Lo /tmp/fastfetch.deb "$url"
-            sudo dpkg -i /tmp/fastfetch.deb
-            rm /tmp/fastfetch.deb
-            ;;
-        rhel)
-            local url
-            url=$(curl -s https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest \
-                | grep "browser_download_url.*linux_${arch}\.rpm" | cut -d'"' -f4)
-            curl -Lo /tmp/fastfetch.rpm "$url"
-            sudo rpm -i /tmp/fastfetch.rpm
-            rm /tmp/fastfetch.rpm
-            ;;
-        suse)
-            eval "$PKG_INSTALL fastfetch" 2>/dev/null || {
-                local url
-                url=$(curl -s https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest \
-                    | grep "browser_download_url.*linux_${arch}\.rpm" | cut -d'"' -f4)
-                curl -Lo /tmp/fastfetch.rpm "$url"
-                sudo rpm -i /tmp/fastfetch.rpm
-                rm /tmp/fastfetch.rpm
-            }
+        debian|rhel|suse)
+            local tmp_dir
+            tmp_dir=$(mktemp -d)
+            local url="https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-${arch}.tar.gz"
+            curl -Lo "$tmp_dir/fastfetch.tar.gz" "$url"
+            sudo tar xf "$tmp_dir/fastfetch.tar.gz" \
+                --strip-components=3 \
+                -C /usr/local/bin \
+                "fastfetch-linux-${arch}/usr/bin/fastfetch" 2>/dev/null \
+                || sudo tar xf "$tmp_dir/fastfetch.tar.gz" \
+                    --wildcards \
+                    -O '*/fastfetch' | sudo tee /usr/local/bin/fastfetch > /dev/null
+            sudo chmod +x /usr/local/bin/fastfetch
+            rm -rf "$tmp_dir"
             ;;
     esac
 
@@ -99,9 +96,9 @@ install_ghostty() {
             eval "$PKG_INSTALL ghostty"
             ;;
         debian)
-            sudo apt install -y software-properties-common
-            sudo add-apt-repository -y ppa:glasen/ghostty
-            sudo apt update && sudo apt install -y ghostty
+            eval "$PKG_INSTALL" ghostty 2>/dev/null \
+                && log_success "ghostty installé via apt" \
+                || log_warn "ghostty non disponible sur apt — voir https://ghostty.org/docs/install/binary"
             ;;
         rhel)
             eval "$PKG_INSTALL ghostty" 2>/dev/null \
@@ -132,34 +129,21 @@ fi
 
 log_step "Installation de Spotify"
 case "$DISTRO_FAMILY" in
-    debian)
-        if ! cmd_exists spotify; then
-            log_info "Ajout du dépôt Spotify..."
-            curl -sS https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg \
-                | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
-            echo "deb http://repository.spotify.com stable non-free" \
-                | sudo tee /etc/apt/sources.list.d/spotify.list
-            sudo apt update && sudo apt install -y spotify-client
-            log_success "Spotify installé"
-        else
-            log_info "Spotify déjà présent"
-        fi
-        ;;
     arch)
         if [[ -n "$AUR_HELPER" ]]; then
             if ! cmd_exists spotify; then
-                log_info "Installation de Spotify via $AUR_HELPER..."
-                $AUR_HELPER -S --noconfirm spotify
-                log_success "Spotify installé"
+                $AUR_HELPER -S --noconfirm spotify \
+                    && log_success "Spotify installé" \
+                    || log_warn "Échec installation Spotify via $AUR_HELPER"
             else
                 log_info "Spotify déjà présent"
             fi
         else
-            log_warn "Aucun AUR helper disponible — installez Spotify manuellement"
+            log_warn "Aucun AUR helper disponible — Spotify sera installé via Flatpak"
         fi
         ;;
     *)
-        log_warn "Spotify non disponible nativement sur cette distribution"
+        log_info "Spotify sera installé via Flatpak (universel et fiable)"
         ;;
 esac
 
@@ -181,6 +165,7 @@ log_step "Installation des applications Flatpak"
 declare -A FLATPAK_APPS=(
     [com.discordapp.Discord]="Discord"
     [com.protonvpn.www]="ProtonVPN"
+    [com.spotify.Client]="Spotify"
     [im.riot.Riot]="Element"
     [io.appflowy.AppFlowy]="AppFlowy"
     [me.proton.Mail]="Proton Mail"

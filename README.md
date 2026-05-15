@@ -47,13 +47,13 @@ chmod +x linux-setup/setup.sh linux-setup/scripts/*.sh
 
 ### Applications natives
 - **Brave Browser** — navigateur axé vie privée (script officiel)
-- **Spotify** — musique (dépôt officiel sur Debian/Ubuntu, AUR sur Arch)
 
 ### Applications Flatpak
 | Application | Description |
 |---|---|
 | **Discord** | Messagerie communautaire |
 | **ProtonVPN** | VPN chiffré |
+| **Spotify** | Lecteur de musique en streaming |
 | **Element** | Client Matrix (messagerie chiffrée) |
 | **AppFlowy** | Notes et gestion de projets |
 | **Proton Mail** | Messagerie chiffrée |
