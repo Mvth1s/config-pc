@@ -3,7 +3,7 @@
 # ── Apparence ────────────────────────────────────────────────
 theme = Everforest Dark Hard
 
-font-family = "JetBrains Mono"
+font-family = "JetBrainsMono Nerd Font Mono"
 font-size = 13
 font-feature = calt, liga
 

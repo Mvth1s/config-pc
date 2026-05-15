@@ -41,6 +41,16 @@ else
     log_info "oh-my-posh déjà présent"
 fi
 
+log_step "Installation des Nerd Fonts (JetBrainsMono)"
+if ! fc-list | grep -qi "JetBrainsMono Nerd"; then
+    log_info "Installation de JetBrainsMono Nerd Font via oh-my-posh..."
+    oh-my-posh font install JetBrainsMono
+    fc-cache -f
+    log_success "JetBrainsMono Nerd Font installée"
+else
+    log_info "JetBrainsMono Nerd Font déjà présente"
+fi
+
 log_step "Installation de zinit"
 ZINIT_HOME="$HOME/.local/share/zinit/zinit.git"
 if [[ ! -d "$ZINIT_HOME" ]]; then
